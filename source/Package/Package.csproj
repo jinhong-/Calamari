@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Build\Package.targets" />
     <None Include="packages.config" />
     <None Include="SecureShell\DeployToLinux.sh">

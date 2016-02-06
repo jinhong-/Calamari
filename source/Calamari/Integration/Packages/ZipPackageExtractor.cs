@@ -1,8 +1,6 @@
 using System;
 using System.IO;
-using SharpCompress.Common;
-using SharpCompress.Reader;
-using SharpCompress.Reader.Zip;
+using Ionic.Zip;
 
 namespace Calamari.Integration.Packages
 {
@@ -14,18 +12,18 @@ namespace Calamari.Integration.Packages
         {
             var filesExtracted = 0;
             using (var inStream = new FileStream(packageFile, FileMode.Open, FileAccess.Read))
-            using (var reader = ZipReader.Open(inStream))
-            {               
-                while (reader.MoveToNextEntry())
+            using (ZipFile zip = ZipFile.Read(inStream))
+            {
+                foreach(var zipEntry in zip)
                 {
-                    ProcessEvent(ref filesExtracted, reader.Entry, suppressNestedScriptWarning);
-                    reader.WriteEntryToDirectory(directory,ExtractOptions.ExtractFullPath | ExtractOptions.Overwrite | ExtractOptions.PreserveFileTime);
+                    ProcessEvent(ref filesExtracted, zipEntry, suppressNestedScriptWarning);
+                    zipEntry.Extract(directory, ExtractExistingFileAction.OverwriteSilently);
                 }
             }
             return filesExtracted;
         }
 
-        protected void ProcessEvent(ref int filesExtracted, IEntry entry, bool suppressNestedScriptWarning)
+        protected void ProcessEvent(ref int filesExtracted, ZipEntry entry, bool suppressNestedScriptWarning)
         {
             if (entry.IsDirectory) return;
 
@@ -33,7 +31,7 @@ namespace Calamari.Integration.Packages
 
             if (!suppressNestedScriptWarning)
             {
-                WarnIfScriptInSubFolder(entry.Key);
+                WarnIfScriptInSubFolder(entry.FileName);
             }
         }
 
